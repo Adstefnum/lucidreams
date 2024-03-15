@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 
 class SignupInputSchema(BaseModel):
     email: str
@@ -19,3 +19,6 @@ class PostInputSchema(BaseModel):
 class PostOutputSchema(BaseModel):
     post_id: int
     text: str
+class OAuth2PasswordRequestFormEmail(BaseModel):
+    email: EmailStr
+    password: str
