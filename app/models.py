@@ -21,5 +21,6 @@ class User(Base):
 class Post(Base):
     __tablename__ = "posts"
     id = Column(Integer, primary_key=True, index=True)
-    text = Column(String, index=True)
+    title = Column(String, index=True)
+    content = Column(String, index=True)
     user_id = Column(Integer, index=True)

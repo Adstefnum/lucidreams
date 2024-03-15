@@ -14,11 +14,13 @@ class TokenSchema(BaseModel):
     token_type: str = "bearer"
 
 class PostInputSchema(BaseModel):
-    text: str
+    content: str
+    title: str
 
 class PostOutputSchema(BaseModel):
     post_id: int
-    text: str
+    title: str
+    content: str
 class OAuth2PasswordRequestFormEmail(BaseModel):
     email: EmailStr
     password: str

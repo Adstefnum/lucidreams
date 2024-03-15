@@ -74,7 +74,7 @@ async def add_post(post: schemas.PostInputSchema, db: Session = Depends(get_db),
     db.add(db_post)
     db.commit()
     db.refresh(db_post)
-    return {"post_id": db_post.id, "text": db_post.text}
+    return {"post_id": db_post.id, "content": db_post.content, "title": db_post.title}
 
 @app.get("/getPosts", response_model=List[schemas.PostOutputSchema])
 async def get_posts(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
