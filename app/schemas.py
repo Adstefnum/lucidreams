@@ -18,7 +18,7 @@ class PostInputSchema(BaseModel):
     title: str
 
 class PostOutputSchema(BaseModel):
-    post_id: int
+    id: int
     title: str
     content: str
     class Config:

@@ -65,7 +65,7 @@ async def add_post(post: schemas.PostInputSchema, db: Session = Depends(get_db),
     db.add(db_post)
     db.commit()
     db.refresh(db_post)
-    return {"post_id": db_post.id, "content": db_post.content, "title": db_post.title}
+    return {"id": db_post.id, "content": db_post.content, "title": db_post.title}
 
 @app.get("/getPosts", response_model=List[schemas.PostOutputSchema])
 async def get_posts(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -74,15 +74,15 @@ async def get_posts(current_user: models.User = Depends(get_current_user), db: S
         return json.loads(cache[cache_key])
     
     posts = db.query(models.Post).filter(models.Post.user_id == current_user.id).all()
-    posts_data = [schemas.PostOutputSchema.from_orm(post) for post in posts]
+    posts_data = [schemas.PostOutputSchema.model_validate(post) for post in posts]
     cache[cache_key] = json.dumps([post.dict() for post in posts_data])
     
     return posts_data
 
 
 @app.post("/deletePost")
-async def delete_post(post_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
-    post = db.query(models.Post).filter(models.Post.id == post_id, models.Post.user_id == current_user.id).first()
+async def delete_post(id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    post = db.query(models.Post).filter(models.Post.id == id, models.Post.user_id == current_user.id).first()
     if post is None:
         raise HTTPException(status_code=404, detail="Post not found")
     db.delete(post)
