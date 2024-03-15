@@ -18,9 +18,12 @@ class PostInputSchema(BaseModel):
     title: str
 
 class PostOutputSchema(BaseModel):
-    post_id: int
+    id: int
     title: str
     content: str
+    class Config:
+        orm_mode = True
+        from_attributes = True
 class OAuth2PasswordRequestFormEmail(BaseModel):
     email: EmailStr
     password: str

@@ -12,9 +12,8 @@ app = FastAPI()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-cache = TTLCache(maxsize=100, ttl=300)  # Cache setup for getPosts
+cache = TTLCache(maxsize=100, ttl=300)
 
-# Dependency to get DB session
 def get_db():
     db = SessionLocal()
     try:
@@ -22,7 +21,6 @@ def get_db():
     finally:
         db.close()
 
-# Dependency for token authentication
 async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -37,23 +35,16 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
 
 @app.post("/signup", response_model=schemas.UserOut)
 async def create_user(signup_data: schemas.SignupInputSchema, db: Session = Depends(get_db)):
-    # Check if the user already exists
     db_user = db.query(models.User).filter(models.User.email == signup_data.email).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
-    
-    # Hash the user's password before storing it in the database
+
     hashed_password = auth.get_password_hash(signup_data.password)
-    
-    # Create new user model instance
     user = models.User(email=signup_data.email, hashed_password=hashed_password)
     
-    # Add to the session and commit
     db.add(user)
     db.commit()
     db.refresh(user)
-    
-    # You might want to create a response model that doesn't include sensitive info like hashed passwords
     return {"email": user.email, "id": user.id}
 
 @app.post("/token", response_model=schemas.TokenSchema)
@@ -80,11 +71,14 @@ async def add_post(post: schemas.PostInputSchema, db: Session = Depends(get_db),
 async def get_posts(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     cache_key = f"user_posts_{current_user.id}"
     if cache_key in cache:
-        # Return cached posts
         return json.loads(cache[cache_key])
+    
     posts = db.query(models.Post).filter(models.Post.user_id == current_user.id).all()
-    cache[cache_key] = json.dumps(posts)  # Serialize posts for caching
-    return posts
+    posts_data = [schemas.PostOutputSchema.from_orm(post) for post in posts]
+    cache[cache_key] = json.dumps([post.dict() for post in posts_data])
+    
+    return posts_data
+
 
 @app.post("/deletePost")
 async def delete_post(post_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
