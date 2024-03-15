@@ -35,6 +35,27 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         raise credentials_exception
     return user
 
+@app.post("/signup", response_model=schemas.UserOut)
+async def create_user(signup_data: schemas.SignupInputSchema, db: Session = Depends(get_db)):
+    # Check if the user already exists
+    db_user = db.query(models.User).filter(models.User.email == signup_data.email).first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Hash the user's password before storing it in the database
+    hashed_password = auth.get_password_hash(signup_data.password)
+    
+    # Create new user model instance
+    user = models.User(email=signup_data.email, hashed_password=hashed_password)
+    
+    # Add to the session and commit
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    
+    # You might want to create a response model that doesn't include sensitive info like hashed passwords
+    return {"email": user.email, "id": user.id}
+
 @app.post("/token", response_model=schemas.TokenSchema)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.email == form_data.username).first()

@@ -3,7 +3,12 @@ from pydantic import BaseModel, Field
 class SignupInputSchema(BaseModel):
     email: str
     password: str
+class UserOut(BaseModel):
+    id: int
+    email: str
 
+    class Config:
+        orm_mode = True
 class TokenSchema(BaseModel):
     access_token: str
     token_type: str = "bearer"
