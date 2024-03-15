@@ -1,12 +1,15 @@
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from passlib.context import CryptContext
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 # Password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-SECRET_KEY = "your_secret_key"
-ALGORITHM = "HS256"
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
