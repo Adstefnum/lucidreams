@@ -63,7 +63,7 @@ Remember to add the token here too
 ### Delete a post
 
 ```
-POST http://127.0.0.1:8000/deletePost?post_id=id
+POST http://127.0.0.1:8000/deletePost?id=id
 ```
 
-![1710504501081](image/README/1710504501081.png)
+![1710510390383](image/README/1710510390383.png)
